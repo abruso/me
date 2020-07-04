@@ -17,3 +17,7 @@ $('body').scrollspy({
 $('.navbar-collapse ul li a').click(function() {
     $('.navbar-toggle:visible').click();
 });
+
+function getYear () {
+  return new Date().getFullYear();
+}
