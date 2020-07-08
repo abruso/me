@@ -9,6 +9,11 @@ body {
     font-family: "Roboto Slab","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+img-badge {
+    witdth: 300px;
+    height: 300px;
+}
+
 .text-muted {
     color: #777;
 }
