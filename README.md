@@ -12,3 +12,5 @@ Next steps
   - language support en | it, use javascript and data dictionary
   - domain
   - pubblicità
+  - centrare logo Actv
+  - inserire immagine Venistar
