@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+  <!-- TIME 2 GO
+
+    Author:  Alessandro Brusò
+    Date:    20201207
+    Version: 1.0
+
+  -->
+
+  <head>
+
+    <!-- meta data -->
+    <meta charset="UTF-8">
+    <meta name="description" content="Time 2 go calculator">
+    <meta name="keywords"    content="Time, Home, Work">
+    <meta name="author"      content="Alessandro Brusò">
+    <meta name="viewport"    content="width=device-width, initial-scale=1.0">
+
+    <!-- title -->
+    <title>Time2Go</title>
+
+    <!-- style -->
+    <style>
+
+      * {
+                           font-size:     xx-large;
+      }
+
+      .center {
+                           text-align:    center;
+      }
+
+      form {
+                           border:        3px solid blue;
+                           padding:       35px;
+      }
+
+      .hide {
+                           display:       none;
+      }
+
+      input[type = text] {
+                           padding:       12px 20px;
+                           margin:        8px 0;
+                           box-sizing:    border-box;
+                           border:        none;
+                           border-bottom: 3px solid blue;
+      }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <div class="center">
+      <form>
+        <label for="timestr">Time:</label>
+        <input type="text" id="timestr" name="timestr" onchange="calculateTime2Go()" onkeyup="calculateTime2Go()" placeholder="E09:00 U13:00 E14:00">
+        <br>
+        <br>
+        <p id="time2go" name="time2go">You can go home at ...</p>
+        <label for="debug" class="hide">Debug:</label>
+        <textarea id="debug" name="debug" class="hide" rows="5" cols="50" disabled></textarea>
+      </form>
+      Copyright &copy;
+      <script type="text/javascript">
+        document.write (new Date ().getFullYear ());
+      </script>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+
+	  function calculateTime2Go() {
+	    var timestr = document.getElementById ("timestr").value;
+		var durata  = "08:00";
+                var newLine = "\r\n";
+
+		// remove characters
+		timestr = timestr.replaceAll ("E", "");
+		timestr = timestr.replaceAll ("U", "");
+		timestr = timestr.replaceAll (" ", "");
+		timestr = timestr.replaceAll (":", "");
+
+                if (timestr.length != 12) {
+                  document.getElementById ("time2go").textContent = "Invalid time, please check.";
+                  return;
+                }
+
+		var t1 = parseInt (timestr.substr (0, 2)) * 60 + parseInt (timestr.substr ( 2, 2));
+		var t2 = parseInt (timestr.substr (4, 2)) * 60 + parseInt (timestr.substr ( 6, 2));
+		var t3 = parseInt (timestr.substr (8, 2)) * 60 + parseInt (timestr.substr (10, 2));
+		var d  = parseInt (durata.substr  (0, 2)) * 60 + parseInt (durata.substr  ( 3, 2));
+
+		var go   = t1 + d + t3 - t2;
+		var gohh = parseInt (go / 60);
+		var gomm = go - (gohh * 60);
+
+                document.getElementById ("debug").value = "Timestr: " + timestr + newLine + t1 + newLine + t2 + newLine + t3 + newLine + d;
+                document.getElementById ("time2go").textContent = "You can go home at " + gohh + ":" + (gomm < 10 ? "0" : "") + gomm;
+		
+      }
+    </script>
+
+  </body>
+
+</html>
