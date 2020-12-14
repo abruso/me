@@ -60,10 +60,14 @@
       <form>
 
         <label for="timestr">Time:</label>
+        <br>
         <input type="text" id="timestr" name="timestr" onchange="calculateTime2Go()" onkeyup="calculateTime2Go()" placeholder="E09:00 U13:00 E14:00">
+        <label for="now" class="hide">Now:</label><br>
+        <input type="text" id="now" name="now" class="hide">
         <br>
         <br>
         <p id="time2go" name="time2go">You can go home at ...</p>
+        <br>
         <label for="debug" class="hide">Debug:</label>
         <textarea id="debug" name="debug" class="hide" rows="5" cols="50" disabled></textarea>
 
@@ -74,35 +78,80 @@
     <!-- JavaScript -->
     <script>
 
-	  function calculateTime2Go() {
-	    var timestr = document.getElementById ("timestr").value;
-		var durata  = "08:00";
-                var newLine = "\r\n";
+          function calculateTime2Go() {
 
-		// remove characters
-		timestr = timestr.replaceAll ("E", "");
-		timestr = timestr.replaceAll ("U", "");
-		timestr = timestr.replaceAll (" ", "");
-		timestr = timestr.replaceAll (":", "");
+            var timestr = document.getElementById ("timestr").value;
+            var durata  = "08:00";
+            var newLine = "\r\n";
+            var validated = true;
+            var length    = 0;
 
-                if (timestr.length != 12) {
-                  document.getElementById ("time2go").textContent = "Invalid time, please check.";
-                  return;
-                }
+            // uppercase, remove characters
+            timestr = timestr.toUpperCase ();
+            timestr = timestr.replaceAll ("E", ""); // entrata
+            timestr = timestr.replaceAll ("U", ""); // uscita
+            timestr = timestr.replaceAll ("W", ""); // timbratura manuale
+            timestr = timestr.replaceAll (" ", "");
+            timestr = timestr.replaceAll (":", "");
 
-		var t1 = parseInt (timestr.substr (0, 2)) * 60 + parseInt (timestr.substr ( 2, 2));
-		var t2 = parseInt (timestr.substr (4, 2)) * 60 + parseInt (timestr.substr ( 6, 2));
-		var t3 = parseInt (timestr.substr (8, 2)) * 60 + parseInt (timestr.substr (10, 2));
-		var d  = parseInt (durata.substr  (0, 2)) * 60 + parseInt (durata.substr  ( 3, 2));
+            // posso inserire solo l'orario di inizio
+            // oppure orario inizio + una sosta (inizio e fine), ad esempio la sosta pasto
+            // oppure orario inizio + due soste (inizio e fine)
+            // oppure orario inizio + tre soste (inizio e fine)
+            // idea: mi riconduco sempre al caso delle tre soste, replicando l'ultimo orario inserito dall'utente
+            //       in questo modo fine - inizio sosta mi darà zero e non graverà sull'orario
 
-		var go   = t1 + d + t3 - t2;
-		var gohh = parseInt (go / 60);
-		var gomm = go - (gohh * 60);
+            length = timestr.length;
 
-                document.getElementById ("debug").value = "Timestr: " + timestr + newLine + t1 + newLine + t2 + newLine + t3 + newLine + d;
-                document.getElementById ("time2go").textContent = "You can go home at " + gohh + ":" + (gomm < 10 ? "0" : "") + gomm;
-		
-      }
+            switch (length) {
+              case  4: timestr = timestr + timestr.substr ( 0, 4).repeat (6);
+                       break;
+              case 12: timestr = timestr + timestr.substr ( 8, 4).repeat (4);
+                       break;
+              case 20: timestr = timestr + timestr.substr (16, 4).repeat (2);
+                       break;
+              case 28: break;
+              default: validated = false;
+            }
+
+            if (!validated) {
+              document.getElementById ("time2go").textContent = "Invalid time, please check.";
+              return;
+            }
+
+            var t1 = parseInt (timestr.substr ( 0, 2)) * 60 + parseInt (timestr.substr ( 2, 2));
+            var t2 = parseInt (timestr.substr ( 4, 2)) * 60 + parseInt (timestr.substr ( 6, 2));
+            var t3 = parseInt (timestr.substr ( 8, 2)) * 60 + parseInt (timestr.substr (10, 2));
+            var t4 = parseInt (timestr.substr (12, 2)) * 60 + parseInt (timestr.substr (14, 2));
+            var t5 = parseInt (timestr.substr (16, 2)) * 60 + parseInt (timestr.substr (18, 2));
+            var t6 = parseInt (timestr.substr (20, 2)) * 60 + parseInt (timestr.substr (22, 2));
+            var t7 = parseInt (timestr.substr (24, 2)) * 60 + parseInt (timestr.substr (26, 2));
+            var d  = parseInt (durata.substr  ( 0, 2)) * 60 + parseInt (durata.substr  ( 3, 2));
+
+            var go   = t1 + d + (t3 - t2) + (t5 - t4) + (t7 - t6);
+            var gohh = parseInt (go / 60);
+            var gomm = go - (gohh * 60);
+            var days = 0;
+
+            while (gohh >= 24) {
+              days++;
+              gohh -= 24;
+            }
+
+            // now
+            var n = new Date ();
+            var h = n.getHours ();
+            var m = n.getMinutes ();
+            var diff = go - (h * 60 + m);
+
+            document.getElementById ("debug").value = "Timestr: " + timestr + newLine + t1 + newLine + t2 + newLine + t3 + newLine + t4 + newLine + t5 + newLine + t6 + newLine + t7 + newLine + d;
+            document.getElementById ("time2go").textContent = "You can go home at " + gohh + ":" + (gomm < 10 ? "0" : "") + gomm + (days > 0 ? " +" + days : "");
+
+            // document.getElementById ("now").value = "Remaining " + h + ":" + (m < 10 ? "0" : "") + m;
+            document.getElementById ("now").value = "Remaining " + diff;
+
+          }
+
     </script>
 
   </body>
